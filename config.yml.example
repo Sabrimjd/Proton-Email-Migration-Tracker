@@ -1,0 +1,166 @@
+# Email Migration Tracker Configuration
+# Copy this file to config.yml and customize for your setup
+
+# Your email accounts
+emails:
+  # Your old email address (the one you're migrating FROM)
+  old_address: "your-old-email@gmail.com"
+
+  # Your new email domains (the ones you're migrating TO)
+  # Services sending to these domains will be auto-marked as migrated
+  new_domains:
+    - "yourdomain.com"
+    - "example.com"
+
+  # Personal email domains to exclude from tracking
+  # These are YOUR domains, not services to migrate
+  personal_domains:
+    - "gmail.com"
+    - "protonmail.com"
+
+# ProtonMail IMAP configuration (direct connection via Proton Bridge)
+protonmail:
+  # IMAP connection settings (Proton Bridge must be running)
+  imap_host: "127.0.0.1"
+  imap_port: 1143
+  imap_user: "your-email@yourdomain.com"
+  imap_password: "YOUR_PROTON_BRIDGE_PASSWORD"
+
+  # Number of recent emails to scan
+  email_scan_limit: 5000
+
+# Database configuration
+database:
+  # Path to SQLite database file
+  path: "data/migration.db"
+
+# Server configuration
+server:
+  # Port for web dashboard
+  port: 3000
+
+# Category definitions
+# Customize these to match your email patterns
+categories:
+  social:
+    keywords:
+      - linkedin
+      - facebook
+      - twitter
+      - instagram
+      - reddit
+      - tiktok
+    color: "#8b5cf6"
+    icon: "Users"
+
+  financial:
+    keywords:
+      - paypal
+      - bank
+      - credit
+      - finance
+      - invest
+      - crypto
+    color: "#ef4444"
+    icon: "DollarSign"
+    priority: high
+
+  shopping:
+    keywords:
+      - amazon
+      - ebay
+      - aliexpress
+    color: "#f59e0b"
+    icon: "ShoppingBag"
+
+  work:
+    keywords:
+      - linkedin
+      - github
+      - gitlab
+    color: "#3b82f6"
+    icon: "Briefcase"
+
+  government:
+    keywords:
+      - gov
+      - tax
+    color: "#6366f1"
+    icon: "Building"
+    priority: high
+
+  health:
+    keywords:
+      - health
+      - medical
+      - doctor
+    color: "#10b981"
+    icon: "Heart"
+
+  travel:
+    keywords:
+      - airbnb
+      - uber
+      - booking
+    color: "#06b6d4"
+    icon: "Plane"
+
+  entertainment:
+    keywords:
+      - netflix
+      - spotify
+      - youtube
+    color: "#f97316"
+    icon: "Gamepad2"
+
+  education:
+    keywords:
+      - coursera
+      - udemy
+    color: "#14b8a6"
+    icon: "GraduationCap"
+
+  food:
+    keywords:
+      - ubereats
+      - deliveroo
+    color: "#f43f5e"
+    icon: "Utensils"
+
+  technology:
+    keywords:
+      - github
+      - stackoverflow
+    color: "#7c3aed"
+    icon: "Code"
+
+  utilities:
+    keywords:
+      - electric
+      - gas
+      - water
+    color: "#84cc16"
+    icon: "Zap"
+
+  newsletters:
+    keywords:
+      - newsletter
+      - digest
+    color: "#ec4899"
+    icon: "Newspaper"
+    priority: low
+
+# Priority domains
+# Services from these domains will always be marked as high priority
+priority:
+  high_domains:
+    - paypal
+    - bank
+    - gov
+
+# Dashboard customization
+dashboard:
+  title: "Email Migration Tracker"
+  subtitle: "Track your email migration progress"
+  theme: "dark"
+  accent_color: "#00d4aa"

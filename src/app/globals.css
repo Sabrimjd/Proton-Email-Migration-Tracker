@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+/* Mission Control Theme - Technical Dashboard Aesthetic */
+
+:root {
+  --background: #0a0b0f;
+  --foreground: #e8eaed;
+  --muted: #6b7280;
+  --accent: #00d4aa;
+  --accent-dim: rgba(0, 212, 170, 0.15);
+  --warning: #fbbf24;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --card: rgba(17, 19, 27, 0.8);
+  --card-hover: rgba(24, 27, 38, 0.9);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-accent: rgba(0, 212, 170, 0.3);
+  --glow: 0 0 20px rgba(0, 212, 170, 0.15);
+  --glow-strong: 0 0 30px rgba(0, 212, 170, 0.25);
+
+  /* Status colors */
+  --status-pending: #fbbf24;
+  --status-progress: #3b82f6;
+  --status-done: #10b981;
+  --status-skip: #6b7280;
+
+  /* Category colors */
+  --cat-social: #8b5cf6;
+  --cat-financial: #ef4444;
+  --cat-work: #3b82f6;
+  --cat-shopping: #f59e0b;
+  --cat-health: #10b981;
+  --cat-travel: #06b6d4;
+  --cat-newsletters: #ec4899;
+  --cat-government: #6366f1;
+  --cat-utilities: #84cc16;
+  --cat-entertainment: #f97316;
+  --cat-education: #14b8a6;
+  --cat-food: #f43f5e;
+  --cat-technology: #7c3aed;
+  --cat-other: #52525b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Atmospheric background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 170, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(59, 130, 246, 0.05), transparent),
+    radial-gradient(ellipse 50% 30% at 0% 80%, rgba(139, 92, 246, 0.04), transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Grid pattern overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+code, .mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Focus states */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: rgba(0, 212, 170, 0.3);
+  color: white;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 212, 170, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(0, 212, 170, 0.5);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Utility classes */
+.glow-accent {
+  box-shadow: var(--glow);
+}
+
+.glow-accent-strong {
+  box-shadow: var(--glow-strong);
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
+}
+
+.border-glow {
+  border: 1px solid var(--border-accent);
+  box-shadow: inset 0 0 10px rgba(0, 212, 170, 0.05);
+}
+
+/* Status indicator dots */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.status-dot.pending {
+  background: var(--status-pending);
+  box-shadow: 0 0 8px var(--status-pending);
+}
+
+.status-dot.in-progress {
+  background: var(--status-progress);
+  box-shadow: 0 0 8px var(--status-progress);
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+.status-dot.migrated {
+  background: var(--status-done);
+  box-shadow: 0 0 8px var(--status-done);
+}
+
+.status-dot.skipped {
+  background: var(--status-skip);
+}
+
+/* Glass card effect */
+.glass {
+  background: rgba(17, 19, 27, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+/* Scan line effect (subtle) */
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* Data highlight */
+.data-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Category pills */
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Progress track */
+.progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Interactive hover states */
+.interactive-card {
+  transition: all 0.2s ease;
+}
+
+.interactive-card:hover {
+  background: var(--card-hover);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Terminal-style text */
+.terminal-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.terminal-text::before {
+  content: '>';
+  color: var(--accent);
+  margin-right: 8px;
+}
