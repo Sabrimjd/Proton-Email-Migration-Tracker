@@ -9,7 +9,10 @@ export interface Config {
     personal_domains: string[];
   };
   protonmail: {
-    config_path: string;
+    imap_host: string;
+    imap_port: number;
+    imap_user: string;
+    imap_password: string;
     email_scan_limit: number;
   };
   database: {
@@ -17,6 +20,10 @@ export interface Config {
   };
   server: {
     port: number;
+  };
+  scheduler?: {
+    enabled: boolean;
+    cron: string;
   };
   categories: Record<string, {
     keywords: string[];
@@ -75,14 +82,21 @@ function getDefaultConfig(): Config {
       personal_domains: ['gmail.com', 'protonmail.com', 'yourdomain.com'],
     },
     protonmail: {
-      config_path: '~/.config/mcporter.json',
-      email_scan_limit: 500,
+      imap_host: '127.0.0.1',
+      imap_port: 1143,
+      imap_user: 'your-email@yourdomain.com',
+      imap_password: 'YOUR_PROTON_BRIDGE_PASSWORD',
+      email_scan_limit: 5000,
     },
     database: {
       path: 'data/migration.db',
     },
     server: {
       port: 3000,
+    },
+    scheduler: {
+      enabled: true,
+      cron: '0 6 * * *',
     },
     categories: {
       social: { keywords: ['linkedin', 'facebook', 'twitter', 'instagram'], color: '#8b5cf6', icon: 'Users' },

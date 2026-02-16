@@ -39,6 +39,20 @@ server:
   # Port for web dashboard
   port: 3000
 
+# Scheduler configuration (automatic email analysis)
+scheduler:
+  # Enable/disable automatic scheduled scans
+  enabled: true
+  
+  # Cron schedule (when to run automatic scans)
+  # Format: "minute hour day month weekday"
+  # Examples:
+  #   "0 6 * * *"      - Every day at 6:00 AM
+  #   "0 */6 * * *"    - Every 6 hours
+  #   "*/30 * * * *"   - Every 30 minutes
+  #   "0 0 * * 0"      - Every Sunday at midnight
+  cron: "0 6 * * *"
+
 # Category definitions
 # Customize these to match your email patterns
 categories:

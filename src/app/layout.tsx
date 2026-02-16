@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { jetbrainsMono, spaceGrotesk } from './font';
+import { initializeServer } from '@/lib/init-server';
+
+// Initialize server-side services (scheduler, etc.)
+if (typeof window === 'undefined') {
+  initializeServer();
+}
 
 export const metadata: Metadata = {
   title: 'Email Migration Tracker',

@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
 } from '@/components/ui/dialog';
+import { SchedulerStatus } from '@/components/SchedulerStatus';
 
 interface Service {
   id: number;
@@ -703,6 +704,9 @@ export default function Home() {
             color="#8b5cf6"
           />
         </div>
+
+        {/* Scheduler Status */}
+        <SchedulerStatus />
 
         {/* Filters */}
         <Card>
