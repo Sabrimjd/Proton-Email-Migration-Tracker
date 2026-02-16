@@ -337,21 +337,55 @@ export default function Home() {
   };
 
   const triggerScan = async () => {
-    // Scan must run on host, not in Docker
-    // Show confirmation to run via CLI
     const confirmed = confirm(
-      'Email scanning must run on the host machine.\n\n' +
-      'Run this command in your terminal:\n' +
-      'npm run analyze-emails\n\n' +
-      'After the scan completes, click OK to refresh the data.'
+      'Start email scan now?\n\n' +
+      'This will scan your inbox and update the database with new services and migration status.\n\n' +
+      'The scan runs in the background and may take 1-2 minutes for large inboxes.'
     );
-    if (confirmed) {
-      setScanning(true);
-      // Refresh data
-      await Promise.all([fetchServices(), fetchCategoryDetails()]);
-      if (activeTab === 'debug') {
-        await fetchDebugInfo();
+    
+    if (!confirmed) return;
+
+    setScanning(true);
+
+    try {
+      // Trigger the scan via API
+      const response = await fetch('/api/scheduler/trigger', { method: 'POST' });
+      const data = await response.json();
+
+      if (data.status === 'triggered') {
+        // Poll for completion
+        let attempts = 0;
+        const maxAttempts = 60; // 60 seconds max
+
+        const pollInterval = setInterval(async () => {
+          attempts++;
+          
+          // Check scheduler status
+          const statusResponse = await fetch('/api/scheduler/status');
+          const statusData = await statusResponse.json();
+
+          if (!statusData.currentlyAnalyzing || attempts >= maxAttempts) {
+            clearInterval(pollInterval);
+            
+            // Refresh data
+            await Promise.all([fetchServices(), fetchCategoryDetails()]);
+            if (activeTab === 'debug') {
+              await fetchDebugInfo();
+            }
+            
+            setScanning(false);
+
+            if (attempts >= maxAttempts) {
+              alert('Scan is taking longer than expected. Check the Automatic Scans card for status.');
+            } else {
+              alert('Scan complete! Data has been refreshed.');
+            }
+          }
+        }, 1000); // Poll every second
       }
+    } catch (error) {
+      console.error('Failed to trigger scan:', error);
+      alert('Failed to start scan. Check console for details.');
       setScanning(false);
     }
   };
@@ -1375,7 +1409,7 @@ export default function Home() {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   {[
-                    { step: 1, title: 'Scan Emails', cmd: 'npm run analyze-emails', desc: 'Discover services from your email history' },
+                    { step: 1, title: 'Scan Emails', desc: 'Click "Scan Emails" button or use automatic scans to discover services' },
                     { step: 2, title: 'Review & Prioritize', desc: 'High priority services (banks, government) are auto-flagged' },
                     { step: 3, title: 'Re-categorize', desc: 'Use the button or dropdowns to fix category assignments' },
                     { step: 4, title: 'Migrate', desc: 'Click Start → Complete as you update each service' },
@@ -1387,11 +1421,6 @@ export default function Home() {
                       <div>
                         <h4 className="text-sm font-mono font-semibold text-white/90">{item.title}</h4>
                         <p className="text-xs text-white/40 font-mono">{item.desc}</p>
-                        {item.cmd && (
-                          <code className="mt-1 text-[10px] font-mono bg-white/5 px-2 py-1 rounded text-[#00d4aa] inline-block">
-                            $ {item.cmd}
-                          </code>
-                        )}
                       </div>
                     </div>
                   ))}
@@ -1609,7 +1638,7 @@ export default function Home() {
                   <div className="text-center py-8 text-white/30 border border-dashed border-white/10 rounded-lg">
                     <Mail className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p className="text-xs font-mono">No email data available</p>
-                    <p className="text-[10px] text-white/20 mt-1">Run analyze-emails to fetch email metadata</p>
+                    <p className="text-[10px] text-white/20 mt-1">Use "Scan Emails" button to fetch metadata</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
