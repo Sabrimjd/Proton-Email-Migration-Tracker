@@ -376,9 +376,33 @@ export default function Home() {
             setScanning(false);
 
             if (attempts >= maxAttempts) {
-              alert('Scan is taking longer than expected. Check the Automatic Scans card for status.');
+              alert('⏱️ Scan is taking longer than expected.\n\nCheck the Automatic Scans card in the Debug tab for status.');
+            } else if (statusData.lastRunResult?.errors?.length > 0) {
+              // Show error details
+              const errorMsg = statusData.lastRunResult.errors.join('\n');
+              alert(
+                '❌ Scan completed with errors:\n\n' +
+                errorMsg +
+                '\n\n' +
+                (errorMsg.includes('ECONNREFUSED') || errorMsg.includes('IMAP') 
+                  ? 'Make sure Proton Bridge is running and accessible.' 
+                  : 'Check the Debug tab for more details.')
+              );
+            } else if (statusData.lastRunResult?.status === 'failed') {
+              alert(
+                '❌ Scan failed.\n\n' +
+                (statusData.lastError || 'Unknown error') +
+                '\n\nCheck the Debug tab for more details.'
+              );
             } else {
-              alert('Scan complete! Data has been refreshed.');
+              const result = statusData.lastRunResult || {};
+              alert(
+                '✅ Scan complete!\n\n' +
+                `📧 Emails scanned: ${result.emailsScanned || 0}\n` +
+                `🏢 Services found: ${result.servicesFound || 0}\n` +
+                `✔️ Migrated: ${result.servicesMigrated || 0}\n\n` +
+                'Data has been refreshed.'
+              );
             }
           }
         }, 1000); // Poll every second
@@ -738,9 +762,6 @@ export default function Home() {
             color="#8b5cf6"
           />
         </div>
-
-        {/* Scheduler Status */}
-        <SchedulerStatus />
 
         {/* Filters */}
         <Card>
@@ -1143,6 +1164,9 @@ export default function Home() {
 
           <TabsContent value="debug">
             <div className="space-y-4">
+              {/* Scheduler Status */}
+              <SchedulerStatus />
+
               {loadingDebug ? (
                 <div className="text-center py-12 text-white/40">
                   <div className="w-8 h-8 border-2 border-[#00d4aa]/30 border-t-[#00d4aa] rounded-full animate-spin mx-auto mb-3" />

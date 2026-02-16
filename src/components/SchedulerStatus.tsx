@@ -19,6 +19,7 @@ interface SchedulerStatus {
     servicesMigrated?: number;
     status?: string;
     error?: string;
+    errors?: string[];
   } | null;
   lastError: string | null;
 }
@@ -149,14 +150,21 @@ export function SchedulerStatus() {
           <div className="p-3 rounded-lg bg-muted/50 space-y-2">
             <div className="flex items-center gap-2">
               {status.lastRunResult.status === 'completed' ? (
-                <CheckCircle className="w-4 h-4 text-green-500" />
+                // Show warning if completed with 0 emails scanned (likely an error)
+                status.lastRunResult.emailsScanned === 0 ? (
+                  <XCircle className="w-4 h-4 text-yellow-500" />
+                ) : (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                )
               ) : status.lastRunResult.status === 'failed' ? (
                 <XCircle className="w-4 h-4 text-red-500" />
               ) : (
                 <Loader2 className="w-4 h-4 animate-spin" />
               )}
               <span className="text-sm font-medium">
-                Last run: {status.lastRunResult.status || 'Running'}
+                Last run: {status.lastRunResult.status === 'completed' && status.lastRunResult.emailsScanned === 0 
+                  ? 'completed (with errors)' 
+                  : status.lastRunResult.status || 'Running'}
               </span>
             </div>
             
@@ -168,9 +176,22 @@ export function SchedulerStatus() {
               </div>
             )}
 
-            {status.lastRunResult.error && (
-              <div className="text-sm text-red-500">
-                Error: {status.lastRunResult.error}
+            {/* Show errors from errors array or error field */}
+            {(status.lastRunResult.error || (status.lastRunResult.errors && status.lastRunResult.errors.length > 0)) && (
+              <div className="text-sm text-red-500 space-y-1">
+                {status.lastRunResult.errors && status.lastRunResult.errors.length > 0 ? (
+                  status.lastRunResult.errors.map((err: string, i: number) => (
+                    <div key={i} className="font-mono text-xs">
+                      {err.includes('ECONNREFUSED') || err.includes('IMAP') ? (
+                        <>⚠️ {err}<br /><span className="text-yellow-500">Make sure Proton Bridge is running and accessible.</span></>
+                      ) : (
+                        <>❌ {err}</>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="font-mono text-xs">❌ {status.lastRunResult.error}</div>
+                )}
               </div>
             )}
           </div>
