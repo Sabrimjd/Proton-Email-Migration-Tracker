@@ -17,13 +17,10 @@ emails:
     - "yourdomain.com"
 
   # Personal email domains to exclude from tracking
-  # These are YOUR domains, not services to migrate
+  # These are YOUR domains as senders, not services to migrate.
+  # Avoid copying all new_domains here unless they are truly your sender domains.
   personal_domains:
     - "gmail.com"
-    - "proton.me"
-    - "protonmail.com"
-    - "pm.me"
-    - "protonmail.ch"
     - "yourdomain.com"
 
 # ProtonMail IMAP configuration (direct connection via Proton Bridge)
