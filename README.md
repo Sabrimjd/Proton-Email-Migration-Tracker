@@ -20,9 +20,6 @@ A beautiful dashboard to track your email migration progress from Gmail to Proto
 
 ## Screenshots
 
-### Overview
-![Overview](screenshots/01-overview.png)
-
 More screenshots and full gallery: [`screenshots/README.md`](screenshots/README.md)
 
 ## How It Works
