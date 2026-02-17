@@ -23,6 +23,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
 } from '@/components/ui/dialog';
 import { SchedulerStatus } from '@/components/SchedulerStatus';
+import { ConfigManager } from '@/components/ConfigManager';
+import { DatabaseManager } from '@/components/DatabaseManager';
 
 interface Service {
   id: number;
@@ -845,6 +847,14 @@ export default function Home() {
           <TabsList className="mb-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="services">Services ({filteredServices.length})</TabsTrigger>
+            <TabsTrigger value="config">
+              <Settings className="w-3 h-3 mr-1" />
+              Config
+            </TabsTrigger>
+            <TabsTrigger value="database">
+              <Database className="w-3 h-3 mr-1" />
+              Database
+            </TabsTrigger>
             <TabsTrigger value="debug">
               <Bug className="w-3 h-3 mr-1" />
               Debug
@@ -1160,6 +1170,14 @@ export default function Home() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="config">
+            <ConfigManager />
+          </TabsContent>
+
+          <TabsContent value="database">
+            <DatabaseManager />
           </TabsContent>
 
           <TabsContent value="debug">
