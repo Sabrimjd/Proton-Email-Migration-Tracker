@@ -23,12 +23,7 @@ A beautiful dashboard to track your email migration progress from Gmail to Proto
 ### Overview
 ![Overview](screenshots/01-overview.png)
 
-### Gallery
-- ![Categories](screenshots/02-categories.png)
-- ![Charts](screenshots/03-charts.png)
-- ![Services List](screenshots/04-services-list.png)
-- ![Service Modal](screenshots/05-service-modal.png)
-- ![Recently Migrated](screenshots/06-recently-migrated.png)
+More screenshots and full gallery: [`screenshots/README.md`](screenshots/README.md)
 
 ## How It Works
 
