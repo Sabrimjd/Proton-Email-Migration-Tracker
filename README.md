@@ -2,7 +2,9 @@
 
 A beautiful dashboard to track your email migration progress from Gmail to ProtonMail (or any IMAP-accessible email service). Automatically discovers services using your old email address and helps you manage the migration to your new email.
 
-![Dashboard Preview](https://via.placeholder.com/800x400/0a0b0f/00d4aa?text=Email+Migration+Tracker)
+![Dashboard Preview](screenshots/01-overview.png)
+
+> Mockup dataset shown in screenshots: **120 services**, **20 migrated**.
 
 ## Features
 
@@ -15,6 +17,18 @@ A beautiful dashboard to track your email migration progress from Gmail to Proto
 - **🤖 Built-in Scheduler** - Automatic background scans with configurable cron schedule (no external cron setup needed!)
 - **⚙️ Fully Configurable** - Customize categories, priorities, and behavior via YAML config
 - **🐳 Docker Ready** - Includes Docker Compose setup for easy deployment
+
+## Screenshots
+
+### Overview
+![Overview](screenshots/01-overview.png)
+
+### Gallery
+- ![Categories](screenshots/02-categories.png)
+- ![Charts](screenshots/03-charts.png)
+- ![Services List](screenshots/04-services-list.png)
+- ![Service Modal](screenshots/05-service-modal.png)
+- ![Recently Migrated](screenshots/06-recently-migrated.png)
 
 ## How It Works
 
