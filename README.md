@@ -71,6 +71,7 @@ protonmail:
   imap_port: 1143
   imap_user: "you@proton.me"
   imap_password: "YOUR_BRIDGE_PASSWORD"
+  email_scan_limit: 5000                # configurable: number of recent emails to fetch per scan
 ```
 
 ## Running scans
