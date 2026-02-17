@@ -7,16 +7,24 @@ emails:
   old_address: "your-old-email@gmail.com"
 
   # Your new email domains (the ones you're migrating TO)
-  # Services sending to these domains will be auto-marked as migrated
+  # Defaults include Proton domains; add your custom domains as needed.
+  # Services sending to these domains will be auto-marked as migrated.
   new_domains:
+    - "proton.me"
+    - "protonmail.com"
+    - "pm.me"
+    - "protonmail.ch"
     - "yourdomain.com"
-    - "example.com"
 
   # Personal email domains to exclude from tracking
   # These are YOUR domains, not services to migrate
   personal_domains:
     - "gmail.com"
+    - "proton.me"
     - "protonmail.com"
+    - "pm.me"
+    - "protonmail.ch"
+    - "yourdomain.com"
 
 # ProtonMail IMAP configuration (direct connection via Proton Bridge)
 protonmail:

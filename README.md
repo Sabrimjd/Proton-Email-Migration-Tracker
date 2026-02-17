@@ -2,6 +2,8 @@
 
 A beautiful dashboard to track your email migration progress from Gmail to ProtonMail (or any IMAP-accessible email service). Automatically discovers services using your old email address and helps you manage the migration to your new email.
 
+> Recommended/primary use case: **Gmail → ProtonMail migration**.
+
 ![Dashboard Preview](screenshots/01-overview.png)
 
 > Mockup dataset shown in screenshots: **120 services**, **20 migrated**.
@@ -39,6 +41,7 @@ More screenshots and full gallery: [`screenshots/README.md`](screenshots/README.
 - **Node.js 18+** (or use Docker)
 - **Proton Bridge** installed and running locally ([Download](https://proton.me/mail/bridge))
 - **ProtonMail account** with IMAP access enabled
+- For Gmail migration workflows, configure Proton **Easy Switch** first so Gmail messages are imported into Proton: <https://proton.me/fr/easyswitch>
 
 ### 1. Clone & Install
 
@@ -60,12 +63,19 @@ Edit `config.yml` with your details:
 
 ```yaml
 emails:
-  old_address: "yourname@gmail.com"           # Your old email
-  new_domains:                                # Your new email domains
-    - "yourdomain.com"
-  personal_domains:                           # Your own domains (excluded from tracking)
-    - "gmail.com"
+  old_address: "yourname@gmail.com"           # Your old Gmail address
+  new_domains:                                  # New email domains (migration targets)
+    - "proton.me"
     - "protonmail.com"
+    - "pm.me"
+    - "protonmail.ch"
+    - "yourdomain.com"                        # Optional custom domain(s)
+  personal_domains:                             # Your own domains to exclude from tracked services
+    - "gmail.com"
+    - "proton.me"
+    - "protonmail.com"
+    - "pm.me"
+    - "protonmail.ch"
     - "yourdomain.com"
 
 protonmail:
@@ -93,11 +103,13 @@ dashboard:
 2. Go to Settings → Account → Your Email
 3. Copy the IMAP password (or generate a new one)
 
-### 3. Run Email Analysis
+### 3. (Optional) Run Email Analysis Manually
 
 ```bash
 npm run analyze-emails
 ```
+
+Use this for one-off/manual scans (debugging, validation, or when scheduler is disabled).
 
 This will:
 - Connect to ProtonMail via IMAP (through Proton Bridge)
@@ -138,7 +150,7 @@ Migrated: 42
 Database saved to: data/migration.db
 ```
 
-### 4. Start the Dashboard
+### 4. Start the Dashboard (recommended flow)
 
 **Development mode:**
 ```bash
@@ -243,6 +255,7 @@ priority:
 The tracker automatically detects services you've already migrated:
 
 - If a service starts sending emails **to your new domains**, it's auto-marked as **"Migrated"**
+- This effectively tracks migration from your `old_address` to your configured `new_domains`
 - The migration date is recorded automatically (date of first email to new domain)
 - No manual updates needed for already-migrated services
 - Re-run `npm run analyze-emails` periodically to detect new migrations
