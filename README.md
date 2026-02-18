@@ -221,14 +221,14 @@ Ensure your repository/organization allows GitHub Actions to write packages:
 2. Under "Workflow permissions", select **Read and write permissions**
 3. Save
 
-#### Optional Secrets (Docker Hub)
+#### Optional Docker Hub credentials
 
 To enable Docker Hub publishing:
 
-| Secret | Description |
-|--------|-------------|
-| `DOCKERHUB_USERNAME` | Docker Hub username |
-| `DOCKERHUB_TOKEN` | Docker Hub access token (create at Account Settings → Security) |
+| Type | Name | Description |
+|------|------|-------------|
+| Repository variable | `DOCKERHUB_USERNAME` | Docker Hub username |
+| Repository secret | `DOCKERHUB_TOKEN` | Docker Hub access token (create at Account Settings → Security) |
 
 ### Release Flow
 
