@@ -73,6 +73,15 @@ Main tags available from GHCR:
 - `<commit-sha>`
 - `vX.Y.Z` (when release tags are pushed)
 
+## Screenshots
+
+### Overview
+
+![Overview dashboard](docs/screenshots/overview-demo.png)
+
+More screenshots:
+- `docs/screenshots/README.md`
+
 ## Documentation
 
 For deployment details and environment options, see:
