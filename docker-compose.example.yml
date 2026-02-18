@@ -1,0 +1,39 @@
+services:
+  email-migration-tracker:
+    image: ${EMT_IMAGE:-ghcr.io/sabrimjd/proton-email-migration-tracker:latest}
+    container_name: ${EMT_CONTAINER_NAME:-email-migration-tracker}
+    network_mode: host
+
+    volumes:
+      # Default: named volume (recommended, no host permission issues)
+      - emt_data:/app/data
+
+      # Optional host bind mount instead (uncomment):
+      # - ${EMT_DATA_DIR:-./data}:/app/data
+
+      # Optional if using Proton Bridge integration through host DBus
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      HOSTNAME: ${EMT_HOSTNAME:-0.0.0.0}
+      PORT: ${EMT_PORT:-3200}
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${EMT_PORT:-3200}/api/services"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+volumes:
+  emt_data:

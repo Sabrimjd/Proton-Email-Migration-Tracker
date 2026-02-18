@@ -41,10 +41,23 @@ The app guides you through a **two-step onboarding flow** on first launch:
 - Configure IMAP connection settings
 - Test your IMAP connection with one click
 - Set up automatic scanning schedule
+- Optional **Demo Mode Quick Start** checkbox to auto-seed mock data right after setup
 
 The wizard saves everything to `config.local.yml`, preserving your original `config.yml`.
 
 **Re-run Setup**: Click "Setup Wizard" in the Config tab anytime to update your configuration through the guided flow.
+
+### Demo Mode Quick Start (one click)
+
+In onboarding Step 2, enable **"Seed mock data right after setup"**.
+When you complete setup, the app automatically calls:
+
+```http
+POST /api/database
+{"action":"seed"}
+```
+
+This gives you a realistic demo dataset instantly so you can test the full user experience without waiting for real email scans.
 
 ### Configuration Manager
 
@@ -82,12 +95,20 @@ Monitor and manage your SQLite database:
 ```bash
 git clone https://github.com/Sabrimjd/Proton-Email-Migration-Tracker.git
 cd Proton-Email-Migration-Tracker
-cp config.yml.example config.yml
-# edit config.yml
-docker compose up -d --build
+cp docker-compose.example.yml docker-compose.yml
+cp .env.docker.example .env
+# optional: edit .env values
+
+docker compose up -d
 ```
 
 Open: <http://localhost:3200>
+
+### Why this compose setup is painless
+
+- Uses a **named Docker volume** by default (`emt_data:/app/data`) to avoid host file permission issues.
+- No manual `chown` needed for first boot.
+- You can still switch to bind mount if you want host-visible files.
 
 ## Using Pre-built Images
 

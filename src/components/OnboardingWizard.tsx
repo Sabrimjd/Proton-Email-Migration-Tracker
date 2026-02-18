@@ -26,6 +26,8 @@ interface FormData {
   schedulerEnabled: boolean;
   schedulerCron: string;
   serverPort: number;
+  // Optional quick demo data
+  seedDemoData: boolean;
 }
 
 interface ValidationErrors {
@@ -55,6 +57,7 @@ const DEFAULT_FORM: FormData = {
   schedulerEnabled: true,
   schedulerCron: '0 6 * * *',
   serverPort: 3200,
+  seedDemoData: false,
 };
 
 export function OnboardingWizard({ onDone, forceOpen = false }: { 
@@ -308,10 +311,12 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
     setToast(null);
 
     try {
+      const { seedDemoData, ...setupPayload } = form;
+
       const res = await fetch('/api/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(setupPayload),
       });
 
       const data = await res.json();
@@ -321,7 +326,27 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
         return;
       }
 
-      showToast('success', 'Setup complete! Your configuration has been saved.');
+      if (seedDemoData) {
+        try {
+          const seedRes = await fetch('/api/database', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'seed' }),
+          });
+          const seedData = await seedRes.json();
+
+          if (!seedData.success) {
+            showToast('info', 'Setup saved, but demo data seeding failed. You can seed later from Database tab.');
+          } else {
+            showToast('success', 'Setup complete! Demo data loaded successfully.');
+          }
+        } catch {
+          showToast('info', 'Setup saved, but demo data seeding failed. You can seed later from Database tab.');
+        }
+      } else {
+        showToast('success', 'Setup complete! Your configuration has been saved.');
+      }
+
       setIsConfigured(true);
 
       setTimeout(() => {
@@ -857,6 +882,18 @@ function Step2Form({
                 : 'border-white/[0.08] focus:border-[#00d4aa]/50'
             }`}
           />
+        </Field>
+
+        <Field label="Demo Mode Quick Start" help="One click to preload sample services after setup">
+          <label className="flex items-center gap-3 h-10 px-3 rounded-lg bg-white/[0.03] border border-white/[0.08] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.seedDemoData}
+              onChange={(e) => onChange('seedDemoData', e.target.checked)}
+              className="w-4 h-4 rounded border-white/20"
+            />
+            <span className="text-sm font-mono text-white/80">Seed mock data right after setup</span>
+          </label>
         </Field>
       </div>
 
