@@ -77,9 +77,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: |
-            org.opencontainers.image.description=Track Gmail to ProtonMail migration progress
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.title=Email Migration Tracker
+            index:org.opencontainers.image.description=Track Gmail to ProtonMail migration progress
+            index:org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            index:org.opencontainers.image.title=Email Migration Tracker
+            manifest:org.opencontainers.image.description=Track Gmail to ProtonMail migration progress
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false

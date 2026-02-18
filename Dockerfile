@@ -45,6 +45,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# OCI labels for GHCR package metadata
+LABEL org.opencontainers.image.title="Email Migration Tracker" \
+      org.opencontainers.image.description="Track Gmail to ProtonMail migration progress" \
+      org.opencontainers.image.source="https://github.com/Sabrimjd/Proton-Email-Migration-Tracker"
+
 # Install runtime dependencies for better-sqlite3
 RUN apk add --no-cache \
     libgcc \
