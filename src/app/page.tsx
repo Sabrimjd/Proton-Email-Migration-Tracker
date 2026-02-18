@@ -8,21 +8,23 @@ import {
 import {
   TrendingUp, Mail, Clock, CheckCircle, AlertCircle, Filter,
   Star, Briefcase, DollarSign, Heart, ShoppingBag, Plane,
-  Newspaper, Building, Zap, Users, ChevronDown, X, RefreshCw,
-  ExternalLink, Calendar, Hash, Gamepad2, GraduationCap, Utensils, Code,
-  Activity, Target, Radio, Inbox, Send, Eye, EyeOff, Search, ArrowRight,
-  Download, Bug, Database, Settings, FileJson, FileSpreadsheet, Trash2,
-  CheckSquare, Square, Keyboard, Info, Cpu, HardDrive, History
+  Newspaper, Building, Zap, Users, X, RefreshCw,
+  Hash, Gamepad2, GraduationCap, Utensils, Code,
+  Activity, Target, Radio, Inbox, Search, ArrowRight,
+  Bug, Database, Settings, FileJson, FileSpreadsheet,
+  CheckSquare, Square, Cpu, HardDrive, History, Info, Keyboard, Send, Eye, EyeOff
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
 } from '@/components/ui/dialog';
 import { SchedulerStatus } from '@/components/SchedulerStatus';
+import { ConfigManager } from '@/components/ConfigManager';
+import { DatabaseManager } from '@/components/DatabaseManager';
+import { OnboardingWizard } from '@/components/OnboardingWizard';
 
 interface Service {
   id: number;
@@ -191,6 +193,9 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [serviceEmails, setServiceEmails] = useState<any[]>([]);
   const [loadingEmails, setLoadingEmails] = useState(false);
+
+  // Onboarding wizard state
+  const [forceOpenWizard, setForceOpenWizard] = useState(false);
 
   useEffect(() => {
     fetchServices();
@@ -622,6 +627,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative">
+      <OnboardingWizard 
+        forceOpen={forceOpenWizard}
+        onDone={() => { 
+          setForceOpenWizard(false);
+          fetchServices(); 
+          fetchCategoryDetails(); 
+        }} 
+      />
       {/* Top status bar */}
       <div className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#0a0b0f]/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
@@ -845,6 +858,14 @@ export default function Home() {
           <TabsList className="mb-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="services">Services ({filteredServices.length})</TabsTrigger>
+            <TabsTrigger value="config">
+              <Settings className="w-3 h-3 mr-1" />
+              Config
+            </TabsTrigger>
+            <TabsTrigger value="database">
+              <Database className="w-3 h-3 mr-1" />
+              Database
+            </TabsTrigger>
             <TabsTrigger value="debug">
               <Bug className="w-3 h-3 mr-1" />
               Debug
@@ -1160,6 +1181,14 @@ export default function Home() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="config">
+            <ConfigManager onRerunSetup={() => setForceOpenWizard(true)} />
+          </TabsContent>
+
+          <TabsContent value="database">
+            <DatabaseManager />
           </TabsContent>
 
           <TabsContent value="debug">
