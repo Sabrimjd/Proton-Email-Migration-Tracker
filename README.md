@@ -203,17 +203,13 @@ This project uses GitHub Actions for automated CI/CD with Docker multi-arch buil
 | **CI** | Push to `main`, PRs | Lint, type-check, build, test Docker image |
 | **Docker Build & Publish** | Push to branches, tags `v*` | Build and push multi-arch images |
 
-### Container Registries
+### Container Registry
 
 Images are published to:
 
-1. **GitHub Container Registry (GHCR)** - Primary registry
+1. **GitHub Container Registry (GHCR)**
    - `ghcr.io/sabrimjd/proton-email-migration-tracker:latest`
-   - Free, built-in with GitHub
-
-2. **Docker Hub** - Optional, if secrets configured
-   - `sabrimjd/proton-email-migration-tracker:latest`
-   - Requires Docker Hub credentials
+   - Native GitHub registry used by this project
 
 ### Image Tags
 
@@ -242,14 +238,7 @@ Ensure your repository/organization allows GitHub Actions to write packages:
 2. Under "Workflow permissions", select **Read and write permissions**
 3. Save
 
-#### Optional Docker Hub credentials
-
-To enable Docker Hub publishing:
-
-| Type | Name | Description |
-|------|------|-------------|
-| Repository variable | `DOCKERHUB_USERNAME` | Docker Hub username |
-| Repository secret | `DOCKERHUB_TOKEN` | Docker Hub access token (create at Account Settings → Security) |
+No external registry secrets are required.
 
 ### Release Flow
 
@@ -266,12 +255,9 @@ git push origin v1.0.0
 ### Pulling Images
 
 ```bash
-# From GHCR (recommended)
+# From GHCR
 docker pull ghcr.io/sabrimjd/proton-email-migration-tracker:latest
 docker pull ghcr.io/sabrimjd/proton-email-migration-tracker:v1.0.0
-
-# From Docker Hub (if configured)
-docker pull sabrimjd/proton-email-migration-tracker:latest
 ```
 
 ### Multi-Architecture Support
