@@ -266,24 +266,24 @@ export function DatabaseManager() {
             
             <div className="p-3 rounded bg-white/[0.03] border border-white/[0.06]">
               <div className="text-[10px] font-mono text-white/40 uppercase mb-1">File Size</div>
-              <div className="text-lg font-mono text-white/90">{dbInfo.stats.sizeFormatted}</div>
+              <div className="text-lg font-mono text-white/90">{dbInfo.stats?.sizeFormatted || 'N/A'}</div>
             </div>
             
             <div className="p-3 rounded bg-white/[0.03] border border-white/[0.06]">
               <div className="text-[10px] font-mono text-white/40 uppercase mb-1">Pages</div>
-              <div className="text-lg font-mono text-white/90">{dbInfo.pageCount.toLocaleString()}</div>
+              <div className="text-lg font-mono text-white/90">{(dbInfo.pageCount ?? 0).toLocaleString()}</div>
             </div>
             
             <div className="p-3 rounded bg-white/[0.03] border border-white/[0.06]">
               <div className="text-[10px] font-mono text-white/40 uppercase mb-1">Last Modified</div>
               <div className="text-xs font-mono text-white/70">
-                {dbInfo.stats.modified ? new Date(dbInfo.stats.modified).toLocaleDateString() : 'N/A'}
+                {dbInfo.stats?.modified ? new Date(dbInfo.stats.modified).toLocaleDateString() : 'N/A'}
               </div>
             </div>
           </div>
           
           <div className="mt-4 text-[10px] font-mono text-white/30">
-            Path: {dbInfo.stats.path}
+            Path: {dbInfo.stats?.path || 'N/A'}
           </div>
         </CardContent>
       </Card>

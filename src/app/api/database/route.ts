@@ -175,17 +175,21 @@ async function createBackup(): Promise<NextResponse> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupFilename = `backup-${timestamp}.db`;
   const backupPath = path.join(backupsDir, backupFilename);
-  
-  // Use SQLite's backup API for consistency
-  const backupDb = require('better-sqlite3')(backupPath);
-  backupDb.exec(`ATTACH DATABASE '${dbPath}' AS source`);
-  backupDb.exec(`SELECT sqlcipher_export('main', 'source')`);
-  backupDb.exec(`DETACH DATABASE source`);
-  backupDb.close();
-  
-  // If that fails, fall back to file copy
+
+  // Flush pending WAL changes then copy (works with standard SQLite builds)
+  try {
+    db.pragma('wal_checkpoint(TRUNCATE)');
+  } catch {
+    // Non-fatal, continue with file copy backup
+  }
+
+  fs.copyFileSync(dbPath, backupPath);
+
   if (!fs.existsSync(backupPath) || fs.statSync(backupPath).size === 0) {
-    fs.copyFileSync(dbPath, backupPath);
+    return NextResponse.json(
+      { success: false, error: 'Backup file was created but is empty' },
+      { status: 500 }
+    );
   }
   
   // Clean old backups (keep last 20)
@@ -219,10 +223,18 @@ async function restoreBackup(filename?: string): Promise<NextResponse> {
       { status: 400 }
     );
   }
+
+  const safeFilename = path.basename(filename);
+  if (safeFilename !== filename || !safeFilename.endsWith('.db')) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid backup filename' },
+      { status: 400 }
+    );
+  }
   
   const dbPath = path.join(process.cwd(), 'data', 'migration.db');
   const backupsDir = path.join(process.cwd(), 'data', 'backups');
-  const backupPath = path.join(backupsDir, filename);
+  const backupPath = path.join(backupsDir, safeFilename);
   
   if (!fs.existsSync(backupPath)) {
     return NextResponse.json(
@@ -242,7 +254,7 @@ async function restoreBackup(filename?: string): Promise<NextResponse> {
   
   return NextResponse.json({
     success: true,
-    message: `Database restored from ${filename}`,
+    message: `Database restored from ${safeFilename}`,
   });
 }
 

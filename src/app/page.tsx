@@ -24,6 +24,7 @@ import {
 import { SchedulerStatus } from '@/components/SchedulerStatus';
 import { ConfigManager } from '@/components/ConfigManager';
 import { DatabaseManager } from '@/components/DatabaseManager';
+import { OnboardingWizard } from '@/components/OnboardingWizard';
 
 interface Service {
   id: number;
@@ -192,6 +193,9 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [serviceEmails, setServiceEmails] = useState<any[]>([]);
   const [loadingEmails, setLoadingEmails] = useState(false);
+
+  // Onboarding wizard state
+  const [forceOpenWizard, setForceOpenWizard] = useState(false);
 
   useEffect(() => {
     fetchServices();
@@ -623,6 +627,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative">
+      <OnboardingWizard 
+        forceOpen={forceOpenWizard}
+        onDone={() => { 
+          setForceOpenWizard(false);
+          fetchServices(); 
+          fetchCategoryDetails(); 
+        }} 
+      />
       {/* Top status bar */}
       <div className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#0a0b0f]/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
@@ -1172,7 +1184,7 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="config">
-            <ConfigManager />
+            <ConfigManager onRerunSetup={() => setForceOpenWizard(true)} />
           </TabsContent>
 
           <TabsContent value="database">

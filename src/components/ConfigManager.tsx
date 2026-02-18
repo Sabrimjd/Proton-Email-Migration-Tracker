@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import {
   Settings, Mail, Server, Clock, Tag, Zap, Monitor,
   Save, RefreshCw, AlertCircle, CheckCircle, Download,
-  RotateCcw, Eye, EyeOff, TestTube
+  RotateCcw, Eye, EyeOff, TestTube, Settings2, Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,7 +57,11 @@ interface ConfigMeta {
   recentBackups: string[];
 }
 
-export function ConfigManager() {
+interface ConfigManagerProps {
+  onRerunSetup?: () => void;
+}
+
+export function ConfigManager({ onRerunSetup }: ConfigManagerProps) {
   const [config, setConfig] = useState<Config | null>(null);
   const [meta, setMeta] = useState<ConfigMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -186,23 +190,30 @@ export function ConfigManager() {
     setTestResult(null);
     
     try {
-      // In a real implementation, this would call an IMAP test endpoint
-      // For now, we'll simulate it
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Real IMAP test via API endpoint
+      const res = await fetch('/api/imap-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          host: config.protonmail.imap_host,
+          port: config.protonmail.imap_port,
+          user: config.protonmail.imap_user,
+          password: config.protonmail.imap_password,
+        }),
+      });
       
-      // Simulated test
-      const success = Math.random() > 0.3; // 70% success rate for demo
+      const data = await res.json();
       
       setTestResult({
-        success,
-        message: success
+        success: data.success,
+        message: data.message || (data.success
           ? 'Connection successful! IMAP server is reachable.'
-          : 'Connection failed. Check your credentials and ensure Proton Bridge is running.',
+          : 'Connection failed. Check your credentials and ensure Proton Bridge is running.'),
       });
     } catch (error) {
       setTestResult({
         success: false,
-        message: 'Connection test failed. Check console for details.',
+        message: 'Connection test failed. Check your settings and try again.',
       });
     } finally {
       setTesting(false);
@@ -284,6 +295,12 @@ export function ConfigManager() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {onRerunSetup && (
+            <Button variant="default" size="sm" onClick={onRerunSetup}>
+              <Settings2 className="w-3 h-3" />
+              Setup Wizard
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={downloadConfig}>
             <Download className="w-3 h-3" />
             Export
@@ -538,7 +555,7 @@ function IMAPSection({ config, editing, editedData, onStartEdit, onCancelEdit, o
             {!editing ? (
               <>
                 <Button size="sm" variant="outline" onClick={onTest} disabled={testing}>
-                  <TestTube className="w-3 h-3" />
+                  {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : <TestTube className="w-3 h-3" />}
                   {testing ? 'Testing...' : 'Test Connection'}
                 </Button>
                 <Button size="sm" onClick={onStartEdit}>Edit</Button>

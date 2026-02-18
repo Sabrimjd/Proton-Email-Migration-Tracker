@@ -66,6 +66,13 @@ export async function PATCH(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    if (typeof data === 'undefined' || data === null || (typeof data !== 'object' && !Array.isArray(data))) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid section payload' },
+        { status: 400 }
+      );
+    }
     
     // Create backup before modifying
     await createConfigBackup(activeConfigPath);
