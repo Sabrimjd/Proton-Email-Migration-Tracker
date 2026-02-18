@@ -19,6 +19,9 @@ RUN npm ci --include=dev
 # Copy source files
 COPY . .
 
+# Ensure public directory exists (may not be present in all Next.js projects)
+RUN mkdir -p /app/public
+
 # Set production environment for build
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
