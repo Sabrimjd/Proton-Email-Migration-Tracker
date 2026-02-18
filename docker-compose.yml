@@ -1,12 +1,14 @@
 services:
   email-migration-tracker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/sabrimjd/email-migration-tracker:latest
     container_name: email-migration-tracker
-    user: "${UID:-1000}:${GID:-1000}"
     network_mode: host
     volumes:
       - ./data:/app/data
-      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
     environment:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
@@ -14,8 +16,15 @@ services:
       - PORT=3200
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3200/api/services"]
+      test: ["CMD", "curl", "--fail", "http://localhost:3200/api/services"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    # Read-only root filesystem (except writable paths)
+    read_only: true
+    tmpfs:
+      - /tmp

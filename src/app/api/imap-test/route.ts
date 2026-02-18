@@ -93,7 +93,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<IMAPTestResul
 async function testIMAPConnection(config: IMAPTestRequest): Promise<IMAPTestResult> {
   return new Promise((resolve) => {
     let serverBanner: string | undefined;
-    let capabilities: string[] = [];
+    const capabilities: string[] = [];
     let folders: string[] = [];
 
     const imap = new Imap({

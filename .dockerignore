@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js build cache
+.next/
+out/
+
+# Testing
+coverage/
+
+# Production builds
+build/
+dist/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Database (should be mounted as volume)
+data/
+*.db
+*.db-journal
+
+# IDE
+.vscode/
+.idea/
+
+# Local config
+config.local.yml
+config.yml
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+screenshots/
+
+# CI/CD
+.github/
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+__tests__/
+
+# Scripts not needed in production
+scripts/

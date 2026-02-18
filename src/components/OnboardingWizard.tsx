@@ -145,12 +145,13 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
         if (isPlaceholder(value)) return 'Please replace the placeholder with your actual email';
         return '';
 
-      case 'newDomains':
+      case 'newDomains': {
         if (!value || !value.trim()) return 'At least one new domain is required';
         const domains = value.split(/[\n,]/).map((s: string) => s.trim()).filter(Boolean);
         if (domains.length === 0) return 'At least one new domain is required';
         if (domains.some((d: string) => isPlaceholder(d))) return 'Please replace placeholder domains';
         return '';
+      }
 
       case 'imapHost':
         if (!value) return 'IMAP host is required';
