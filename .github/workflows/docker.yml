@@ -19,7 +19,7 @@ concurrency:
 env:
   REGISTRY_GHCR: ghcr.io
   REGISTRY_DOCKERHUB: docker.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: sabrimjd/proton-email-migration-tracker
 
 jobs:
   build-and-push:
@@ -109,7 +109,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ secrets.DOCKERHUB_USERNAME }}/email-migration-tracker
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/proton-email-migration-tracker
           short-description: ${{ github.event.repository.description }}
           enable-url-completion: true
         continue-on-error: true

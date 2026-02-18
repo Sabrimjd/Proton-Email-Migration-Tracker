@@ -80,8 +80,8 @@ Monitor and manage your SQLite database:
 ## Quick Start (Docker - recommended)
 
 ```bash
-git clone https://github.com/Sabrimjd/email-migration-tracker.git
-cd email-migration-tracker
+git clone https://github.com/Sabrimjd/Proton-Email-Migration-Tracker.git
+cd Proton-Email-Migration-Tracker
 cp config.yml.example config.yml
 # edit config.yml
 docker compose up -d --build
@@ -95,7 +95,7 @@ Pull and run directly from GitHub Container Registry:
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/sabrimjd/email-migration-tracker:latest
+docker pull ghcr.io/sabrimjd/proton-email-migration-tracker:latest
 
 # Run with docker-compose (create docker-compose.yml first)
 docker compose up -d
@@ -187,11 +187,11 @@ This project uses GitHub Actions for automated CI/CD with Docker multi-arch buil
 Images are published to:
 
 1. **GitHub Container Registry (GHCR)** - Primary registry
-   - `ghcr.io/sabrimjd/email-migration-tracker:latest`
+   - `ghcr.io/sabrimjd/proton-email-migration-tracker:latest`
    - Free, built-in with GitHub
 
 2. **Docker Hub** - Optional, if secrets configured
-   - `sabrimjd/email-migration-tracker:latest`
+   - `sabrimjd/proton-email-migration-tracker:latest`
    - Requires Docker Hub credentials
 
 ### Image Tags
@@ -200,14 +200,14 @@ Every build generates multiple tags:
 
 ```bash
 # Branch builds
-ghcr.io/sabrimjd/email-migration-tracker:main
-ghcr.io/sabrimjd/email-migration-tracker:abc1234          # commit SHA
+ghcr.io/sabrimjd/proton-email-migration-tracker:main
+ghcr.io/sabrimjd/proton-email-migration-tracker:abc1234          # commit SHA
 
 # Release builds (v1.2.3)
-ghcr.io/sabrimjd/email-migration-tracker:1.2.3
-ghcr.io/sabrimjd/email-migration-tracker:1.2
-ghcr.io/sabrimjd/email-migration-tracker:1
-ghcr.io/sabrimjd/email-migration-tracker:latest           # main only
+ghcr.io/sabrimjd/proton-email-migration-tracker:1.2.3
+ghcr.io/sabrimjd/proton-email-migration-tracker:1.2
+ghcr.io/sabrimjd/proton-email-migration-tracker:1
+ghcr.io/sabrimjd/proton-email-migration-tracker:latest           # main only
 ```
 
 ### GitHub Setup
@@ -246,11 +246,11 @@ git push origin v1.0.0
 
 ```bash
 # From GHCR (recommended)
-docker pull ghcr.io/sabrimjd/email-migration-tracker:latest
-docker pull ghcr.io/sabrimjd/email-migration-tracker:v1.0.0
+docker pull ghcr.io/sabrimjd/proton-email-migration-tracker:latest
+docker pull ghcr.io/sabrimjd/proton-email-migration-tracker:v1.0.0
 
 # From Docker Hub (if configured)
-docker pull sabrimjd/email-migration-tracker:latest
+docker pull sabrimjd/proton-email-migration-tracker:latest
 ```
 
 ### Multi-Architecture Support

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/sabrimjd/email-migration-tracker:latest
+    image: ghcr.io/sabrimjd/proton-email-migration-tracker:latest
     container_name: email-migration-tracker
     network_mode: host
     volumes:

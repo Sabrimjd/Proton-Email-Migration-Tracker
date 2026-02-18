@@ -56,7 +56,7 @@ jobs:
           context: .
           push: false
           load: true
-          tags: email-migration-tracker:test
+          tags: proton-email-migration-tracker:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -65,7 +65,7 @@ jobs:
           docker run --rm -d --name test-container \
             -e PORT=3000 \
             -p 3000:3000 \
-            email-migration-tracker:test
+            proton-email-migration-tracker:test
           
           # Wait for container to start
           sleep 15
