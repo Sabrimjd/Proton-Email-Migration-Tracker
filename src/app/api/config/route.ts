@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
-import { getConfig, resetConfig, Config } from '@/lib/config';
+import { resetConfig, Config } from '@/lib/config';
 
 // GET /api/config - Load current configuration
 export async function GET() {

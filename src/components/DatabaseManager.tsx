@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Database, HardDrive, Table, RefreshCw, Download, Upload, Trash2,
-  CheckCircle, AlertCircle, Info, Archive, Clock, FileJson, Zap,
-  TestTube, Copy, AlertTriangle
+  Database, Table, RefreshCw, Download, Upload, Trash2,
+  CheckCircle, AlertCircle, Info, Archive, Zap,
+  TestTube, AlertTriangle
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

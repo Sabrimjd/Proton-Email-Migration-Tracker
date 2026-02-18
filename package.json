@@ -25,6 +25,8 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/better-sqlite3": "^7.6.11",
     "@types/imap": "^0.8.43",
@@ -34,10 +36,12 @@
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.20",
     "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^10.0.0",
     "imap": "^0.8.19",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.56.0"
   }
 }

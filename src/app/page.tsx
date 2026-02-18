@@ -8,16 +8,15 @@ import {
 import {
   TrendingUp, Mail, Clock, CheckCircle, AlertCircle, Filter,
   Star, Briefcase, DollarSign, Heart, ShoppingBag, Plane,
-  Newspaper, Building, Zap, Users, ChevronDown, X, RefreshCw,
-  ExternalLink, Calendar, Hash, Gamepad2, GraduationCap, Utensils, Code,
-  Activity, Target, Radio, Inbox, Send, Eye, EyeOff, Search, ArrowRight,
-  Download, Bug, Database, Settings, FileJson, FileSpreadsheet, Trash2,
-  CheckSquare, Square, Keyboard, Info, Cpu, HardDrive, History
+  Newspaper, Building, Zap, Users, X, RefreshCw,
+  Hash, Gamepad2, GraduationCap, Utensils, Code,
+  Activity, Target, Radio, Inbox, Search, ArrowRight,
+  Bug, Database, Settings, FileJson, FileSpreadsheet,
+  CheckSquare, Square, Cpu, HardDrive, History, Info, Keyboard, Send, Eye, EyeOff
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle

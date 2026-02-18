@@ -18,6 +18,40 @@ More screenshots and full gallery: [`screenshots/README.md`](screenshots/README.
 - Shows progress, categories, priority, and recent activity in a dashboard
 - Runs automatic scans with the built-in scheduler
 
+## Features
+
+### Dashboard Tabs
+
+- **Overview**: Migration progress, stats, and category distribution charts
+- **Services**: Searchable list with bulk actions, filtering, and service details
+- **Config**: Visual configuration manager for all app settings
+- **Database**: Database health monitoring, backups, and management
+- **Debug**: System status and scheduler monitoring
+
+### Configuration Manager
+
+The Config tab provides a comprehensive UI for managing settings without editing YAML files:
+
+- Email addresses (old Gmail, new domains, personal domains)
+- IMAP connection settings with connection test
+- Scheduler configuration (enable/disable, cron schedule)
+- Category customization
+- Priority domains
+- Dashboard appearance (title, subtitle, accent color)
+
+All changes are saved to `config.local.yml`, preserving your original `config.yml`.
+
+### Database Manager
+
+Monitor and manage your SQLite database:
+
+- Health checks and integrity verification
+- Table statistics (services, emails, scan runs)
+- Backup creation and restoration
+- Database optimization (VACUUM)
+- Seed data for testing
+- Safe data clearing with confirmation
+
 ## Prerequisites
 
 - Docker + Docker Compose (recommended)

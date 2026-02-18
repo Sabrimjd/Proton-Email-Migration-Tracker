@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Settings, Mail, Server, Database, Clock, Tag, Zap, Monitor,
-  Save, RefreshCw, AlertCircle, CheckCircle, Info, Download,
-  Upload, Trash2, RotateCcw, Eye, EyeOff, TestTube
+  Settings, Mail, Server, Clock, Tag, Zap, Monitor,
+  Save, RefreshCw, AlertCircle, CheckCircle, Download,
+  RotateCcw, Eye, EyeOff, TestTube
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
