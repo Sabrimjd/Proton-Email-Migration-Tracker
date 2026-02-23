@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
+import { DatabaseStats, BackupFile, TableStats, DatabaseIndex } from '@/types/database';
 
 // GET /api/database - Get database health and info
 export async function GET() {
@@ -140,7 +141,10 @@ export async function POST(req: NextRequest) {
       
       case 'switch-mock':
         return await switchToMockDatabase();
-      
+
+      case 'delete':
+        return await deleteDatabase();
+
       default:
         return NextResponse.json(
           { success: false, error: 'Invalid action' },
@@ -151,6 +155,33 @@ export async function POST(req: NextRequest) {
     console.error('Error in database action:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to perform database action' },
+      { status: 500 }
+    );
+  }
+}
+
+// Delete the entire database
+async function deleteDatabase(): Promise<NextResponse> {
+  const dbPath = path.join(process.cwd(), 'data', 'migration.db');
+
+  if (!fs.existsSync(dbPath)) {
+    return NextResponse.json(
+      { success: false, error: 'Database file not found' },
+      { status: 404 }
+    );
+  }
+
+  try {
+    fs.unlinkSync(dbPath);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Database deleted successfully. Onboarding wizard will appear on next load.',
+    });
+  } catch (error) {
+    console.error('Error deleting database:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete database' },
       { status: 500 }
     );
   }
@@ -286,7 +317,9 @@ async function clearDatabase(tables?: string[], confirm?: string): Promise<NextR
   
   for (const table of tablesToClear) {
     try {
-      const result = db.prepare(`DELETE FROM ${table}`).run();
+      // Use parameterized query with validated table name
+      const stmt = db.prepare(`DELETE FROM ${table}`);
+      const result = stmt.run();
       results[table] = { cleared: true, rowsAffected: result.changes };
     } catch (error) {
       results[table] = { cleared: false, error: String(error) };

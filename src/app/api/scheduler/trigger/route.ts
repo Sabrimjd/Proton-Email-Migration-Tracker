@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
 import { runScheduledAnalysis } from '@/lib/scheduler';
+import { Logger } from '@/lib/logger';
 
 export async function POST() {
   try {
-    console.log('[API] Manual trigger requested');
+    Logger.info('[API] Manual trigger requested');
     
     // Run in background and return immediately
     runScheduledAnalysis()
       .then((result) => {
-        console.log('[API] Manual analysis completed:', result);
+        Logger.info('[API] Manual analysis completed: ' + JSON.stringify(result));
       })
       .catch((error) => {
-        console.error('[API] Manual analysis failed:', error);
+        Logger.error('[API] Manual analysis failed: ' + String(error));
       });
 
     return NextResponse.json({

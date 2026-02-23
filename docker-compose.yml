@@ -15,6 +15,7 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       - HOSTNAME=0.0.0.0
       - PORT=3200
+      - CONFIG_DIR=/app/data/config
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:3200/api/services"]
@@ -25,10 +26,7 @@ services:
     # Security options
     security_opt:
       - no-new-privileges:true
-    # Read-only root filesystem (except writable paths)
-    read_only: true
-    tmpfs:
-      - /tmp
+    # Removed read-only to allow config file writing
 
 volumes:
   emt_data:

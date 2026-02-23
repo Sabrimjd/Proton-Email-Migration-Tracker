@@ -5,23 +5,6 @@ import yaml from 'yaml';
 import { Config, getConfig, resetConfig, getDefaultConfig } from '@/lib/config';
 import { Logger } from '@/lib/logger';
 
-function isPlaceholder(value?: string): boolean {
-  if (!value) return true;
-  const v = value.trim().toLowerCase();
-
-  // Check for placeholder patterns - be more specific to avoid false positives
-  return (
-    v.includes('yourname@') ||
-    v.includes('your-email@') ||
-    v.includes('your_proton_bridge_password') ||
-    // Generic placeholder detection - only match the exact placeholder text
-    v.toLowerCase() === 'example' ||
-    v.toLowerCase() === 'test' ||
-    v.toLowerCase() === 'user' ||
-    v.toLowerCase() === 'admin'
-  );
-}
-
 function isValidEmail(email?: string): boolean {
   if (!email) return false;
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -45,24 +28,30 @@ function getActiveConfigPath(): string {
 function getSetupState(config: Config, forceCheck: boolean = false) {
   const errors: string[] = [];
 
-  if (!isValidEmail(config.emails?.old_address) || isPlaceholder(config.emails?.old_address)) {
-    errors.push('Old email address is missing or still placeholder');
+  // If forceCheck is true, always show wizard
+  if (forceCheck) {
+    return { configured: false, errors: [] };
   }
 
-  if (!Array.isArray(config.emails?.new_domains) || config.emails.new_domains.length === 0 || config.emails.new_domains.some(isPlaceholder)) {
-    errors.push('New domains are missing or still placeholder');
+  // Check for missing values
+  if (!isValidEmail(config.emails?.old_address)) {
+    errors.push('Old email address is missing');
   }
 
-  if (!isValidEmail(config.protonmail?.imap_user) || isPlaceholder(config.protonmail?.imap_user)) {
-    errors.push('IMAP user is missing or still placeholder');
+  if (!Array.isArray(config.emails?.new_domains) || config.emails.new_domains.length === 0) {
+    errors.push('New domains are missing');
   }
 
-  if (!config.protonmail?.imap_password || isPlaceholder(config.protonmail?.imap_password)) {
-    errors.push('IMAP password is missing or still placeholder');
+  if (!isValidEmail(config.protonmail?.imap_user)) {
+    errors.push('IMAP user is missing');
+  }
+
+  if (!config.protonmail?.imap_password) {
+    errors.push('IMAP password is missing');
   }
 
   return {
-    configured: forceCheck ? false : errors.length === 0,
+    configured: errors.length === 0,
     errors,
   };
 }
@@ -140,27 +129,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Add at least one new domain' }, { status: 400 });
     }
 
-    if (!imapPassword) {
-      return NextResponse.json({ success: false, error: 'IMAP password is required' }, { status: 400 });
-    }
-
-    if (!Number.isFinite(imapPort) || imapPort < 1 || imapPort > 65535) {
-      return NextResponse.json({ success: false, error: 'IMAP port must be between 1 and 65535' }, { status: 400 });
-    }
-
-    if (!Number.isFinite(serverPort) || serverPort < 1 || serverPort > 65535) {
-      return NextResponse.json({ success: false, error: 'Server port must be between 1 and 65535' }, { status: 400 });
-    }
-
-    let existing: Config;
-
-    // Try to read existing config, or use defaults if files don't exist
+    // Load existing config
+    const configPath = getActiveConfigPath();
     const activePath = getActiveConfigPath();
-    if (fs.existsSync(activePath)) {
-      const raw = fs.readFileSync(activePath, 'utf8');
-      existing = yaml.parse(raw) as Config;
-    } else {
-      existing = getDefaultConfig();
+
+    let existing: any = {};
+    if (fs.existsSync(configPath)) {
+      existing = yaml.parse(fs.readFileSync(configPath, 'utf8'));
     }
 
     const nextConfig: Config = {
@@ -169,7 +144,7 @@ export async function POST(req: NextRequest) {
         ...existing.emails,
         old_address: oldAddress,
         new_domains: newDomains,
-        personal_domains: personalDomains.length > 0 ? personalDomains : ['gmail.com', 'protonmail.com', ...newDomains],
+        personal_domains: personalDomains,
       },
       protonmail: {
         ...existing.protonmail,
@@ -179,34 +154,29 @@ export async function POST(req: NextRequest) {
         imap_password: imapPassword,
         email_scan_limit: emailScanLimit,
       },
-      server: {
-        ...existing.server,
-        port: serverPort,
-      },
       scheduler: {
         enabled: schedulerEnabled,
         cron: schedulerCron,
       },
+      server: {
+        port: serverPort,
+      },
     };
 
-    // Use the same config directory logic as getActiveConfigPath()
+    // Ensure directory exists
     const configDir = process.env.CONFIG_DIR || process.cwd();
-    const targetPath = path.join(configDir, 'config.local.yml');
-
-    // Ensure config directory exists
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
     }
 
-    fs.writeFileSync(targetPath, yaml.stringify(nextConfig), 'utf8');
+    fs.writeFileSync(configPath, yaml.stringify(nextConfig), 'utf8');
 
     resetConfig();
 
     return NextResponse.json({
       success: true,
-      message: 'Initial setup saved to config.local.yml',
+      message: 'Configuration saved successfully',
       configured: true,
-      startingScan: true, // Indicate that a first scan will start
     });
   } catch (error) {
     Logger.error('Error applying setup: ' + String(error));

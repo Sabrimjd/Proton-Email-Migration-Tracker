@@ -6,13 +6,13 @@ import {
   Tooltip, Legend, ResponsiveContainer, LineChart, Line
 } from 'recharts';
 import {
-  TrendingUp, Mail, Clock, CheckCircle, AlertCircle, Filter,
+  TrendingUp, Mail, Clock, CheckCircle, AlertCircle, AlertTriangle, Filter,
   Star, Briefcase, DollarSign, Heart, ShoppingBag, Plane,
   Newspaper, Building, Zap, Users, X, RefreshCw,
   Hash, Gamepad2, GraduationCap, Utensils, Code,
   Activity, Target, Radio, Inbox, Search, ArrowRight,
   Bug, Database, Settings, FileJson, FileSpreadsheet,
-  CheckSquare, Square, Cpu, HardDrive, History, Info, Keyboard, Send, Eye, EyeOff
+  CheckSquare, Square, Cpu, HardDrive, History, Info, Keyboard, Send, Eye, EyeOff, RotateCcw, Trash2, Download
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -182,6 +182,13 @@ export default function Home() {
 
   // Scan state
   const [scanning, setScanning] = useState(false);
+  const [showingSetupWizard, setShowingSetupWizard] = useState(false);
+  const [startingScan, setStartingScan] = useState(false);
+  const [showingLogs, setShowingLogs] = useState(false);
+  const [logs, setLogs] = useState<{ timestamp: string; level: string; message: string }[]>([]);
+  const [forceOpenWizard, setForceOpenWizard] = useState(false);
+  const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
   // Dialog state
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -195,8 +202,6 @@ export default function Home() {
   const [loadingEmails, setLoadingEmails] = useState(false);
 
   // Onboarding wizard state
-  const [forceOpenWizard, setForceOpenWizard] = useState(false);
-
   useEffect(() => {
     fetchServices();
     fetchCategoryDetails();
@@ -228,6 +233,21 @@ export default function Home() {
       setCategoryDetails(data.categories || []);
     } catch (error) {
       console.error('Error fetching category details:', error);
+    }
+  };
+
+  const fetchLogs = async () => {
+    setLoadingDebug(true);
+    try {
+      const res = await fetch('/api/logs');
+      const data = await res.json();
+      if (data.success) {
+        setLogs(data.logs || []);
+      }
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    } finally {
+      setLoadingDebug(false);
     }
   };
 
@@ -447,6 +467,10 @@ export default function Home() {
   useEffect(() => {
     if (activeTab === 'debug') {
       fetchDebugInfo();
+      // Always load logs when debug tab opens
+      if (logs.length === 0) {
+        fetchLogs();
+      }
     }
   }, [activeTab]);
 
@@ -627,13 +651,185 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative">
-      <OnboardingWizard 
+      {console.log('[Page] Delete dialog open:', showingDeleteDialog) as any}
+      {/* Delete Database Confirmation Dialog */}
+      <Dialog open={showingDeleteDialog} onOpenChange={setShowingDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-400">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Database
+            </DialogTitle>
+            <DialogDescription>
+              This will permanently delete all services, emails, and scan history.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="text-xs font-mono text-white/90">
+                <p className="mb-2"><strong className="text-red-300">Warning:</strong></p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>All services and emails will be deleted</li>
+                  <li>Scan history will be lost</li>
+                  <li>Onboarding wizard will appear on next load</li>
+                  <li>You will need to complete setup again</li>
+                </ul>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <label className="flex items-start gap-2 text-xs font-mono text-white/70">
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder='Type "DELETE" to confirm'
+                  className="flex-1 px-3 py-2 text-sm font-mono bg-white/[0.03] border border-white/[0.06] rounded-lg text-white/90 placeholder:text-white/30 focus:outline-none focus:border-red-500/50"
+                />
+                <span className="text-white/40">(required)</span>
+              </label>
+            </div>
+          </CardContent>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowingDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (deleteConfirmation !== 'DELETE') {
+                  alert('Please type "DELETE" to confirm');
+                  return;
+                }
+
+                console.log('[Page] Deleting database with confirmation:', deleteConfirmation);
+
+                try {
+                  console.log('[Page] Fetching /api/database delete...');
+                  const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete' }),
+                  });
+                  console.log('[Page] API response:', response.status, response.statusText);
+                  const data = await response.json();
+                  console.log('[Page] API data:', data);
+
+                  if (data.success) {
+                    setShowingDeleteDialog(false);
+                    setDeleteConfirmation('');
+                    setServices([]);
+                    setStats({ total: 0, migrated: 0, pending: 0, inProgress: 0, skipped: 0, totalEmails: 0, highPriority: 0 });
+                    setChartData({
+                      categoryDistribution: [],
+                      categoryProgress: [],
+                      emailVolumeOverTime: [],
+                      statusDistribution: [],
+                    });
+
+                    // Clear logs
+                    setLogs([]);
+
+                    // Force wizard to appear on next load by clearing config
+                    await fetch('/api/setup?force=true');
+                    await fetchDebugInfo();
+
+                    alert('Database deleted successfully. You will be redirected to the onboarding wizard.');
+                    window.location.reload();
+                  } else {
+                    alert(data.error || 'Failed to delete database');
+                  }
+                } catch (error) {
+                  console.error('Error deleting database:', error);
+                  alert('Failed to delete database');
+                }
+              }}
+              disabled={deleteConfirmation !== 'DELETE'}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Database
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* First Scan Starting Feedback */}
+      {startingScan && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0a0b0f]/95 backdrop-blur-xl">
+          <div className="max-w-md mx-auto p-6 rounded-lg border border-[#00d4aa]/30 bg-[#0a0b0f] text-center">
+            <div className="w-12 h-12 mx-auto mb-4">
+              <div className="relative w-full h-full">
+                <div className="absolute inset-0 rounded-full border-2 border-[#00d4aa]/30 animate-ping" />
+                <div className="absolute inset-2 rounded-full border-2 border-[#00d4aa]/50 animate-pulse" />
+                <RefreshCw className="absolute inset-0 w-full h-full text-[#00d4aa] animate-spin" />
+              </div>
+            </div>
+            <h3 className="text-lg font-mono font-semibold text-white/90 mb-2">Starting First Scan</h3>
+            <p className="text-sm font-mono text-white/60 mb-4">
+              The system is analyzing your Proton Mail inbox. For large inboxes, this may take 2-5 minutes.
+            </p>
+            <div className="text-xs font-mono text-[#00d4aa]/80 bg-[#00d4aa]/5 px-3 py-2 rounded border border-[#00d4aa]/20">
+              <p className="mb-1">⏳ Analysis in progress</p>
+              <p>📊 Real-time updates in Debug tab</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <OnboardingWizard
         forceOpen={forceOpenWizard}
-        onDone={() => { 
+        onDone={async (startingScan) => {
           setForceOpenWizard(false);
-          fetchServices(); 
-          fetchCategoryDetails(); 
-        }} 
+          fetchServices();
+          fetchCategoryDetails();
+
+          // Show feedback if first scan is starting
+          if (startingScan) {
+            console.log('[Page] First scan triggered, showing overlay');
+            setStartingScan(true);
+
+            // Trigger the scan
+            try {
+              const response = await fetch('/api/scheduler/trigger', { method: 'POST' });
+              const data = await response.json();
+              console.log('[Page] Scan trigger response:', data);
+
+              if (data.status === 'triggered') {
+                // Poll for completion
+                const pollInterval = setInterval(async () => {
+                  try {
+                    const statusRes = await fetch('/api/scheduler/status');
+                    const statusData = await statusRes.json();
+
+                    if (!statusData.currentlyAnalyzing) {
+                      clearInterval(pollInterval);
+                      setStartingScan(false);
+                      setScanning(false);
+                      fetchServices();
+                      fetchCategoryDetails();
+
+                      if (activeTab === 'debug') {
+                        await fetchDebugInfo();
+                      }
+                    }
+                  } catch {
+                    // Continue polling
+                  }
+                }, 2000);
+
+                // Stop polling after 2 minutes
+                setTimeout(() => clearInterval(pollInterval), 120000);
+              }
+            } catch (error) {
+              console.error('Failed to trigger scan:', error);
+              setStartingScan(false);
+            }
+          }
+        }}
       />
       {/* Top status bar */}
       <div className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#0a0b0f]/90 backdrop-blur-xl">
@@ -1399,6 +1595,137 @@ export default function Home() {
                             <span className="text-[10px] font-mono text-white/40">{s.count} emails</span>
                           </div>
                         ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Actions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-xs">
+                        <Zap className="w-3.5 h-3.5 text-[#00d4aa]" />
+                        Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {/* Re-run Setup Wizard */}
+                        <button
+                          onClick={async () => {
+                            setForceOpenWizard(true);
+                            // Force wizard to open by calling setup API with force=true
+                            await fetch('/api/setup?force=true');
+                            // Trigger refresh by calling fetchDebugInfo
+                            await fetchDebugInfo();
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono text-white/90 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] rounded-lg transition-colors"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          Re-run Setup Wizard
+                        </button>
+
+                        {/* View Logs */}
+                        <button
+                          onClick={() => { setActiveTab('debug'); setShowingLogs(true); }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono text-white/90 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] rounded-lg transition-colors"
+                        >
+                          <FileJson className="w-3 h-3" />
+                          View Logs
+                        </button>
+
+                        {/* Delete Database */}
+                        <button
+                          onClick={() => {
+                            console.log('[Page] Delete Database button clicked');
+                            setShowingDeleteDialog(true);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono text-red-90 hover:text-red bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Delete Database
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Logs Display (always visible in debug section) */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-xs">
+                        <FileJson className="w-3.5 h-3.5 text-[#00d4aa]" />
+                        System Logs
+                        <div className="ml-auto flex items-center gap-2">
+                          <div
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              await fetchLogs();
+                            }}
+                            className="flex items-center gap-2 text-xs font-mono text-white/40 hover:text-white/60 cursor-pointer"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            Refresh
+                          </div>
+                          <div
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              const logsResponse = await fetch('/api/logs');
+                              const logsData: { success: boolean; logs: { timestamp: string; level: string; message: string }[] } = await logsResponse.json();
+
+                              if (logsData.success && logsData.logs.length > 0) {
+                                const logsText = logsData.logs
+                                  .map(log => `[${log.timestamp}] [${log.level.toUpperCase()}] ${log.message}`)
+                                  .join('\n');
+
+                                const blob = new Blob([logsText], { type: 'text/plain' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `email-migration-tracker-logs-${new Date().toISOString()}.txt`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              } else {
+                                alert('No logs to download');
+                              }
+                            }}
+                            className="flex items-center gap-2 text-xs font-mono text-white/40 hover:text-white/60 cursor-pointer"
+                          >
+                            <Download className="w-3 h-3" />
+                            Download
+                          </div>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {logs.map((log, idx) => (
+                          <div
+                            key={idx}
+                            className={`p-2 rounded text-[10px] font-mono font-family-mono ${
+                              log.level === 'error' ? 'bg-red-500/10 border border-red-500/20' :
+                              log.level === 'warn' ? 'bg-amber-500/10 border border-amber-500/20' :
+                              'bg-white/[0.02] border border-white/[0.04]'
+                              }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-white/40">{log.timestamp}</span>
+                              <span className={`px-2 py-0.5 rounded text-[9px] uppercase ${
+                                log.level === 'error' ? 'bg-red-500/20 text-red-300' :
+                                log.level === 'warn' ? 'bg-amber-500/20 text-amber-300' :
+                                'bg-white/10 text-white/60'
+                                }`}>
+                                {log.level}
+                                </span>
+                              </div>
+                            <div className="text-white/80">{log.message}</div>
+                          </div>
+                        ))}
+                        {logs.length === 0 && (
+                          <div className="text-center py-8 text-white/40 text-xs font-mono">
+                            No logs available. Click Refresh to load logs.
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

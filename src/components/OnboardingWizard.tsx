@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode, type FormEvent } from 'react';
+import { useEffect, useState, type ReactNode, type FormEvent, type MouseEvent } from 'react';
 import {
   CheckCircle, Loader2, Settings2, Mail, Server, Clock,
   ChevronRight, ChevronLeft, AlertCircle, Eye, EyeOff,
@@ -52,7 +52,7 @@ const DEFAULT_FORM: FormData = {
   imapHost: '127.0.0.1',
   imapPort: 1143,
   imapUser: '',
-  imapPassword: '',
+  imapPassword: 'protonmail-bridge-password', // Mock default password
   emailScanLimit: 5000,
   schedulerEnabled: true,
   schedulerCron: '0 6 * * *',
@@ -60,8 +60,8 @@ const DEFAULT_FORM: FormData = {
   seedDemoData: false,
 };
 
-export function OnboardingWizard({ onDone, forceOpen = false }: { 
-  onDone?: () => void; 
+export function OnboardingWizard({ onDone, forceOpen = false }: {
+  onDone?: (startingScan: boolean) => void;
   forceOpen?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -79,6 +79,7 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
 
   // Load initial state
   useEffect(() => {
+    console.log('[OnboardingWizard] Component mounted, loading initial state');
     const load = async () => {
       try {
         const res = await fetch('/api/setup');
@@ -95,17 +96,19 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
           oldAddress: data.defaults?.oldAddress || '',
           newDomains: data.defaults?.newDomains || '',
           personalDomains: data.defaults?.personalDomains || '',
-          imapHost: data.defaults?.imapHost || '127.0.0.1',
-          imapPort: data.defaults?.imapPort || 1143,
+          imapHost: data.defaults?.imapHost || DEFAULT_FORM.imapHost,
+          imapPort: data.defaults?.imapPort || DEFAULT_FORM.imapPort,
           imapUser: data.defaults?.imapUser || '',
-          imapPassword: '', // Never pre-fill password
-          emailScanLimit: data.defaults?.emailScanLimit || 5000,
-          schedulerEnabled: data.defaults?.schedulerEnabled ?? true,
-          schedulerCron: data.defaults?.schedulerCron || '0 6 * * *',
-          serverPort: data.defaults?.serverPort || 3200,
+          // Use provided default or fallback to DEFAULT_FORM (has mock password)
+          imapPassword: data.defaults?.imapPassword || DEFAULT_FORM.imapPassword,
+          emailScanLimit: data.defaults?.emailScanLimit || DEFAULT_FORM.emailScanLimit,
+          schedulerEnabled: data.defaults?.schedulerEnabled ?? DEFAULT_FORM.schedulerEnabled,
+          schedulerCron: data.defaults?.schedulerCron || DEFAULT_FORM.schedulerCron,
+          serverPort: data.defaults?.serverPort || DEFAULT_FORM.serverPort,
         });
 
-        // Open wizard if not configured or forced
+        // Open wizard if not configured OR explicitly requested via forceOpen prop
+        // Only auto-open on first load if no config files exist at all
         if (!data.configured || forceOpen) {
           setOpen(true);
         }
@@ -117,6 +120,13 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
     };
 
     load();
+  }, []);
+
+  // Watch forceOpen prop and open wizard when it changes to true
+  useEffect(() => {
+    if (forceOpen) {
+      setOpen(true);
+    }
   }, [forceOpen]);
 
   // Toast helper
@@ -188,7 +198,7 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
     }
   };
 
-  const validateStep = (step: number): boolean => {
+  const validateStep = (step: number): { valid: boolean; errors: ValidationErrors } => {
     const newErrors: ValidationErrors = {};
     let isValid = true;
 
@@ -211,7 +221,7 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
     }
 
     setErrors(newErrors);
-    return isValid;
+    return { valid: isValid, errors: newErrors };
   };
 
   const handleBlur = (name: string) => {
@@ -284,42 +294,101 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
 
   // Navigation
   const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 2));
+    const { valid, errors } = validateStep(currentStep);
+    if (!valid) {
+      // Log each field's validation error
+      Object.entries(errors).forEach(([field, message]) => {
+        console.log(`[OnboardingWizard] Field ${field} error: ${message}`);
+      });
+      return;
     }
+    setCurrentStep(prev => Math.min(prev + 1, 2));
   };
 
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  // Form submission
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  // Form submission - handles both form submit (FormEvent) and button click (MouseEvent)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
+    // IMMEDIATE logging at the very beginning for debugging
+    console.log('[OnboardingWizard] ========================================');
+    console.log('[OnboardingWizard] === HANDLE SUBMIT CALLED ===');
+    console.log('[OnboardingWizard] ========================================');
+    console.log('[OnboardingWizard] Event received:', e);
+    console.log('[OnboardingWizard] Event type:', e?.type);
+    console.log('[OnboardingWizard] Event constructor:', e?.constructor?.name);
+    console.log('[OnboardingWizard] Event is FormEvent?', e?.type === 'submit');
+    console.log('[OnboardingWizard] Event is MouseEvent?', e?.type === 'click');
+    console.log('[OnboardingWizard] Current step:', currentStep);
+    console.log('[OnboardingWizard] Form data:', JSON.stringify(form, null, 2));
+    console.log('[OnboardingWizard] Saving state (before):', saving);
 
-    if (!validateStep(currentStep)) {
+    // Prevent default behavior if available (form submit has it, button click doesn't need it)
+    if (e && typeof e.preventDefault === 'function') {
+      console.log('[OnboardingWizard] Calling e.preventDefault()');
+      e.preventDefault();
+    } else {
+      console.log('[OnboardingWizard] No preventDefault on event (expected for MouseEvent)');
+    }
+
+    console.log('[OnboardingWizard] Validating step', currentStep, '...');
+    const currentStepResult = validateStep(currentStep);
+    console.log('[OnboardingWizard] Step', currentStep, 'validation result:', { valid: currentStepResult.valid, errorCount: Object.keys(currentStepResult.errors).length });
+    if (!currentStepResult.valid) {
+      console.log('[OnboardingWizard] Step validation failed.');
+      // Log each field's validation error individually
+      Object.entries(currentStepResult.errors).forEach(([field, message]) => {
+        console.log(`[OnboardingWizard] Field ${field} error: ${message}`);
+      });
+      const errorMessages = Object.entries(currentStepResult.errors)
+        .map(([field, message]) => `${field}: ${message}`)
+        .join('; ');
+      showToast('error', `Validation failed: ${errorMessages}`);
       return;
     }
 
     // Validate all fields before final submission
-    if (!validateStep(1) || !validateStep(2)) {
-      showToast('error', 'Please fix all errors before submitting');
+    console.log('[OnboardingWizard] Validating all steps...');
+    const step1Validation = validateStep(1);
+    const step2Validation = validateStep(2);
+    console.log('[OnboardingWizard] Step 1 validation result:', { valid: step1Validation.valid, errorCount: Object.keys(step1Validation.errors).length });
+    console.log('[OnboardingWizard] Step 2 validation result:', { valid: step2Validation.valid, errorCount: Object.keys(step2Validation.errors).length });
+
+    if (!step1Validation.valid || !step2Validation.valid) {
+      console.log('[OnboardingWizard] Global validation failed.');
+      const allErrors = { ...step1Validation.errors, ...step2Validation.errors };
+      // Log each field's validation error individually
+      Object.entries(allErrors).forEach(([field, message]) => {
+        console.log(`[OnboardingWizard] Field ${field} error: ${message}`);
+      });
+      const errorMessages = Object.entries(allErrors)
+        .map(([field, message]) => `${field}: ${message}`)
+        .join('; ');
+      showToast('error', `Please fix all errors: ${errorMessages}`);
       return;
     }
 
+    console.log('[OnboardingWizard] All validation passed, starting save...');
+    console.log('[OnboardingWizard] Setting saving=true');
     setSaving(true);
     setToast(null);
 
     try {
+      console.log('[OnboardingWizard] Preparing API payload...');
       const { seedDemoData, ...setupPayload } = form;
+      console.log('[OnboardingWizard] API payload:', JSON.stringify(setupPayload, null, 2));
 
+      console.log('[OnboardingWizard] Calling POST /api/setup...');
       const res = await fetch('/api/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(setupPayload),
       });
 
+      console.log('[OnboardingWizard] API response status:', res.status);
       const data = await res.json();
+      console.log('[OnboardingWizard] API response data:', JSON.stringify(data, null, 2));
 
       if (!data.success) {
         showToast('error', data.error || 'Failed to save configuration');
@@ -349,10 +418,14 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
 
       setIsConfigured(true);
 
+      console.log('[OnboardingWizard] Closing wizard, configured=true');
+
       setTimeout(() => {
         setOpen(false);
         setCurrentStep(1);
-        onDone?.();
+        // Trigger scan if demo data was selected, otherwise let user trigger manually
+        console.log('[OnboardingWizard] Calling onDone with seedDemoData:', seedDemoData);
+        onDone?.(seedDemoData);
       }, 1500);
     } catch {
       showToast('error', 'Failed to save configuration. Please try again.');
@@ -396,27 +469,13 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
         </div>
       )}
 
-      {/* Re-run Setup Button (shown when configured and wizard closed) */}
-      {isConfigured && !open && (
-        <button
-          onClick={() => {
-            setCurrentStep(1);
-            setOpen(true);
-          }}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono text-white/60 hover:text-white/90 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] rounded-lg transition-colors"
-        >
-          <RotateCcw className="w-3 h-3" />
-          Re-run Setup Wizard
-        </button>
-      )}
-
       {/* Wizard Dialog */}
       <Dialog open={open} onOpenChange={(isOpen) => {
         // Prevent closing via overlay click during initial setup
         if (!isConfigured) return;
         setOpen(isOpen);
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Settings2 className="w-5 h-5 text-[#00d4aa]" />
@@ -536,7 +595,10 @@ export function OnboardingWizard({ onDone, forceOpen = false }: {
               ) : (
                 <Button 
                   type="button" 
-                  onClick={handleSubmit}
+                  onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                    console.log('[OnboardingWizard] Complete Setup button clicked, calling handleSubmit...');
+                    handleSubmit(e);
+                  }}
                   disabled={saving}
                 >
                   {saving ? (

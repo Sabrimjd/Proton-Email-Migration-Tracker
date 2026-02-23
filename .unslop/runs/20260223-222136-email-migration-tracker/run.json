@@ -1,0 +1,14 @@
+{
+  "runId": "20260223-222136-email-migration-tracker",
+  "timestamp": "2026-02-23T22:21:36+01:00",
+  "repository": "https://github.com/Sabrimjd/Proton-Email-Migration-Tracker",
+  "projectName": "Proton Email Migration Tracker",
+  "stack": {
+    "framework": "Next.js",
+    "language": "TypeScript",
+    "database": "SQLite"
+  },
+  "focusAreas": ["Security", "Code Quality", "Maintainability"],
+  "reviewers": ["Zara", "Lev", "Mira", "Axel"],
+  "status": "initialized"
+}

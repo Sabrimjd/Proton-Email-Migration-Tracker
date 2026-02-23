@@ -63,6 +63,23 @@ export function loadConfig(): Config {
 }
 
 function getConfigPath(): string {
+  // Check for custom config directory from environment variable (Docker)
+  const configDir = process.env.CONFIG_DIR;
+  if (configDir) {
+    // Ensure directory exists
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+
+    const localConfig = path.join(configDir, 'config.local.yml');
+    const defaultConfig = path.join(configDir, 'config.yml');
+
+    if (fs.existsSync(localConfig)) {
+      return localConfig;
+    }
+    return defaultConfig;
+  }
+
   // Check for local config first, then fall back to default
   const baseDir = process.cwd();
   const localConfig = path.join(baseDir, 'config.local.yml');
@@ -132,3 +149,5 @@ export function getConfig(): Config {
 export function resetConfig() {
   cachedConfig = null;
 }
+
+export { getDefaultConfig };
